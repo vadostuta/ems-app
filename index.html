@@ -229,6 +229,7 @@ footer p{margin:0 0 8px}
         Download for Mac
       </a>
       <p class="fine">macOS 14 or newer · works on Apple Silicon and Intel · free</p>
+      <p class="fine" id="relinfo" hidden></p>
       <p class="next">After downloading, follow the <a href="#setup">three-minute setup</a>. macOS will put up a warning; the setup explains it.</p>
     </div>
     <img class="logo" src="logo.png" width="264" height="264" alt="EMS app icon">
@@ -390,6 +391,32 @@ footer p{margin:0 0 8px}
     clearTimeout(btn._t);
     btn._t = setTimeout(function(){ btn.textContent = 'Copy'; status.textContent=''; }, 2200);
   }
+  /* Latest version, read live from the GitHub API. Deliberately progressive: the
+     element starts hidden and only appears if the request succeeds, so a rate limit,
+     a dropped connection or an API change leaves the page exactly as it was rather
+     than showing a stale or broken version number. The release assets themselves
+     cannot be read this way - they are served without CORS headers - but the API is. */
+  (function(){
+    var el = document.getElementById('relinfo');
+    if (!el || !window.fetch) return;
+    fetch('https://api.github.com/repos/vadostuta/ems-releases/releases/latest',
+          { headers: { 'Accept': 'application/vnd.github+json' } })
+      .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+      .then(function(d){
+        var v = String(d.tag_name || '').replace(/^v/, '');
+        if (!v) return;
+        var out = 'Version ' + v;
+        if (d.published_at) {
+          var t = new Date(d.published_at);
+          if (!isNaN(t)) out += ' · ' + t.toLocaleDateString('en-GB',
+            { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        el.textContent = out;
+        el.hidden = false;
+      })
+      .catch(function(){ /* leave it hidden */ });
+  })();
+
   document.querySelectorAll('[data-copy]').forEach(function(btn){
     btn.addEventListener('click', function(){
       var el = document.getElementById(btn.getAttribute('data-copy'));
