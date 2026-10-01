@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMS — explain me shit</title>
+<meta name="description" content="A small macOS menu bar app. Select anything on your screen, press a hotkey, and get it explained in plain language.">
+<meta name="color-scheme" content="light dark">
+
+<link rel="icon" href="logo.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<!-- Link preview, for when the page is sent in a chat -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vadostuta.github.io/ems-app/">
+<meta property="og:title" content="EMS — explain me shit">
+<meta property="og:description" content="A small macOS menu bar app. Select anything on your screen, press a hotkey, and get it explained in plain language.">
+<meta property="og:image" content="https://vadostuta.github.io/ems-app/logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF7D9;
+  --surface:#FFFDF3;
+  --ink:#003631;
+  --muted:#3E5F59;
+  --line:#E9DCA8;
+  --accent:#003631;
+  --accent-ink:#FFEDA8;
+  --accent-hover:#00554C;
+  --note-bg:#FFEDA8;
+  --note-line:#DCC46A;
+  --note-ink:#003631;
+  --code-bg:#003631;
+  --code-ink:#FFEDA8;
+  --key-bg:#FFFDF3;
+  --key-line:#CFC089;
+  --key-shadow:#B9A96C;
+  --focus:#00554C;
+  --sans:"Newsreader",Georgia,"Times New Roman",serif;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#003631;
+    --surface:#06443D;
+    --ink:#FFEDA8;
+    --muted:#CFC9A0;
+    --line:#175650;
+    --accent:#FFEDA8;
+    --accent-ink:#003631;
+    --accent-hover:#FFF6D2;
+    --note-bg:#1C4B39;
+    --note-line:#7D7A48;
+    --note-ink:#FFEDA8;
+    --code-bg:#00221F;
+    --code-ink:#FFEDA8;
+    --key-bg:#06443D;
+    --key-line:#2B6A61;
+    --key-shadow:#001C19;
+    --focus:#FFEDA8;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:19px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-underline-offset:2px}
+a:hover{color:var(--accent-hover)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:16px;top:16px;background:var(--surface);padding:8px 12px;z-index:10}
+
+/* Hero */
+header.hero{padding:88px 0 72px;border-bottom:1px solid var(--line)}
+.mark{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--sans);font-style:italic;font-size:17px;color:var(--muted);margin-bottom:24px
+}
+.hero-grid{display:grid;gap:28px;align-items:center}
+@media (min-width:720px){.hero-grid{grid-template-columns:minmax(0,1fr) auto;gap:40px}}
+.logo{display:block;width:clamp(200px,30vw,280px);height:auto;aspect-ratio:1/1;margin:0 -12px 0 0}
+@media (max-width:719px){.logo{order:-1;width:150px;margin:0 0 0 -8px}}
+h1{font-size:clamp(44px,9vw,72px);line-height:1;letter-spacing:-.03em;margin:0 0 6px;font-weight:700}
+.expansion{font-family:var(--sans);font-style:italic;font-size:19px;color:var(--muted);margin:0 0 28px}
+.lede{font-size:clamp(21px,3.4vw,26px);line-height:1.35;margin:0 0 36px;max-width:30ch;font-weight:500;letter-spacing:-.01em}
+.btn{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--accent);color:var(--accent-ink);
+  font-weight:600;font-size:19px;text-decoration:none;
+  padding:18px 30px;border-radius:12px;min-height:56px;
+  transition:background .15s ease
+}
+.btn:hover{background:var(--accent-hover);color:var(--accent-ink)}
+.btn svg{width:22px;height:22px;flex:none}
+.fine{font-size:15px;color:var(--muted);margin:14px 0 0}
+.next{font-size:15px;margin:22px 0 0}
+
+
+/* Headings: Instrument Serif */
+.f-instrument h1,.f-instrument h2{font-family:"Instrument Serif",Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.01em}
+.f-instrument h1{font-size:clamp(64px,12vw,104px)}
+.f-instrument h2{font-size:clamp(36px,6vw,48px)}
+
+/* Sections */
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+h2{font-size:clamp(28px,5vw,36px);line-height:1.15;letter-spacing:-.02em;margin:0 0 12px;font-weight:700}
+h3{font-size:20px;line-height:1.3;margin:0 0 6px;font-weight:600}
+.intro{color:var(--muted);margin:0 0 36px;max-width:56ch}
+p{margin:0 0 14px}
+
+/* Keys */
+kbd{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:1.9em;height:1.9em;padding:0 .45em;margin:0 1px;
+  font-family:var(--ui);font-size:.82em;font-weight:500;line-height:1;
+  color:var(--ink);background:var(--key-bg);
+  border:1px solid var(--key-line);border-radius:6px;
+  box-shadow:0 2px 0 var(--key-shadow);vertical-align:.1em
+}
+.keys{display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;font-size:20px;min-height:42px}
+.keys .icon{width:30px;height:30px;color:var(--muted)}
+
+/* Capabilities */
+.caps{display:grid;gap:16px}
+.cap{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.cap p{margin:0;color:var(--muted)}
+.extras{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+.extras li{padding-left:22px;position:relative}
+.extras li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.byok{margin-top:36px;padding:22px 24px;border:1px dashed var(--key-line);border-radius:14px}
+.byok h3{font-size:18px}
+.byok p{margin:0;color:var(--muted)}
+@media (min-width:720px){.caps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Templates */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+.chips li{
+  font-size:15px;font-weight:500;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface)
+}
+
+/* Setup */
+#setup h2 small{display:block;font-size:17px;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:6px}
+ol.steps{list-style:none;margin:40px 0 0;padding:0;display:grid;gap:20px;counter-reset:step}
+ol.steps>li{
+  counter-increment:step;position:relative;
+  background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:28px 24px 24px 24px
+}
+.step-head{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
+.step-num{
+  flex:none;display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--ink);color:var(--bg);font-weight:700;font-size:18px;
+  transform:translateY(-2px)
+}
+.step-head h3{margin:0;font-size:22px}
+ol.steps p:last-child{margin-bottom:0}
+.note{
+  background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-ink);
+  border-radius:10px;padding:14px 16px;margin:0 0 18px
+}
+.note strong{font-weight:600}
+.howto{margin:0 0 16px;padding-left:22px}
+.howto li{margin-bottom:6px}
+.code{
+  display:flex;align-items:stretch;gap:0;margin:6px 0 14px;
+  background:var(--code-bg);color:var(--code-ink);border-radius:10px;overflow:hidden
+}
+.code code{
+  flex:1;min-width:0;font-family:var(--mono);font-size:15px;line-height:1.5;
+  padding:16px 18px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch
+}
+.copy{
+  flex:none;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+  background:transparent;color:var(--code-ink);
+  border:0;border-left:1px solid rgba(255,255,255,.16);
+  padding:0 18px;min-width:96px;min-height:48px
+}
+.copy:hover{background:rgba(255,255,255,.08)}
+.copy:focus-visible{outline-offset:-4px}
+.quiet{color:var(--muted);font-size:16px}
+.alt{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.path{font-weight:600}
+code.inline{font-family:var(--mono);font-size:.92em;background:var(--bg);border:1px solid var(--line);padding:1px 6px;border-radius:5px}
+
+/* Privacy */
+.privacy{margin:0;padding:0;list-style:none;display:grid;gap:18px}
+.privacy li{padding-left:22px;position:relative}
+.privacy li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+
+/* Footer */
+footer{padding:48px 0 72px;color:var(--muted);font-size:15px}
+footer p{margin:0 0 8px}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (max-width:480px){
+  body{font-size:18px}
+  header.hero{padding:56px 0 52px}
+  section{padding:56px 0}
+  .btn{width:100%;justify-content:center}
+  ol.steps>li{padding:22px 18px 20px}
+  .copy{min-width:80px;padding:0 14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body class="f-instrument">
+<a class="skip" href="#setup">Skip to setup</a>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      <div class="mark">a menu bar app for macOS</div>
+      <h1>EMS</h1>
+      <p class="expansion">“explain me shit”</p>
+      <p class="lede">Select anything on your screen, press a hotkey, and get it explained in plain language, written for a beginner.</p>
+      <a class="btn" href="https://github.com/vadostuta/ems-releases/releases/latest/download/EMS.zip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="M7 10.5 12 15.5 17 10.5"></path><path d="M5 19.5h14"></path></svg>
+        Download for Mac
+      </a>
+      <p class="fine">macOS 14 or newer · works on Apple Silicon and Intel · free</p>
+      <p class="next">After downloading, follow the <a href="#setup">three-minute setup</a>. macOS will put up a warning; the setup explains it.</p>
+    </div>
+    <img class="logo" src="logo.png" width="264" height="264" alt="EMS app icon">
+  </div>
+</header>
+
+<main>
+  <section id="what" aria-labelledby="what-h">
+    <div class="wrap">
+      <h2 id="what-h">What it does</h2>
+      <p class="intro">It sits in the menu bar. No Dock icon, no window. It shows up only when you press one of its keys.</p>
+
+      <div class="caps">
+        <div class="cap">
+          <div class="keys" aria-label="Option Command E"><kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd></div>
+          <h3>Explain selected text</h3>
+          <p>Select text anywhere — a code editor, a web page, a database client — and press the keys. A small floating panel explains it.</p>
+        </div>
+        <div class="cap">
+          <div class="keys" aria-label="Option Command S"><kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd></div>
+          <h3>Explain a screenshot</h3>
+          <p>Drag a box around part of the screen instead. Good for charts, error dialogs and diagrams.</p>
+        </div>
+        <div class="cap">
+          <div class="keys" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H9l-5 4z"/><path d="M8.5 10.5h7"/></svg></div>
+          <h3>Ask follow-ups</h3>
+          <p>Type a question in the same panel. It remembers the conversation, so “what does that part mean” works.</p>
+        </div>
+      </div>
+
+      <ul class="extras">
+        <li>Keeps a history of your last 15 explanations, on your Mac.</li>
+      </ul>
+
+      <div class="byok">
+        <h3>It uses your own AI key</h3>
+        <p>EMS has no AI of its own. It connects to a free account you make with Groq or Google Gemini (or paid Anthropic, or any OpenAI-compatible service). That is why it is free, and why there is no EMS account to sign up for. Nobody pays for anyone else’s usage.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="templates" aria-labelledby="templates-h">
+    <div class="wrap">
+      <h2 id="templates-h">Templates</h2>
+      <p>A template decides what kind of explainer EMS is: how it talks, what it assumes you know, what it focuses on. Five come with it. You can edit any of them, or write your own.</p>
+      <ul class="chips" aria-label="Included templates">
+        <li>SQL</li>
+        <li>Maths</li>
+        <li>Code</li>
+        <li>Driving theory</li>
+        <li>Plain English rewriter</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="setup" aria-labelledby="setup-h">
+    <div class="wrap">
+      <h2 id="setup-h">Setup<small>About three minutes. Do the steps in order.</small></h2>
+
+      <ol class="steps">
+        <li>
+          <div class="step-head"><span class="step-num" aria-hidden="true">1</span><h3><span class="sr">Step 1: </span>Install</h3></div>
+          <p>Open your Downloads folder. If you see <code class="inline">EMS.zip</code> instead of EMS, double-click it to unzip.</p>
+          <p>Drag <strong>EMS</strong> into your <strong>Applications</strong> folder. Don’t open it yet.</p>
+        </li>
+
+        <li>
+          <div class="step-head"><span class="step-num" aria-hidden="true">2</span><h3><span class="sr">Step 2: </span>Get past the security warning</h3></div>
+          <div class="note">
+            <p><strong>macOS will say EMS “is damaged” or “cannot be opened”. It isn’t damaged.</strong></p>
+            <p style="margin:0">That is what macOS says about any app that isn’t signed with a paid Apple developer account. EMS isn’t, and it isn’t from the App Store. The fix is one line.</p>
+          </div>
+          <ol class="howto">
+            <li>Open Terminal: press <kbd>⌘</kbd><kbd>Space</kbd>, type <strong>Terminal</strong>, press <kbd>Return</kbd>.</li>
+            <li>Copy this line, paste it into Terminal, press <kbd>Return</kbd>.</li>
+          </ol>
+          <div class="code">
+            <code id="cmd">xattr -dr com.apple.quarantine /Applications/EMS.app</code>
+            <button class="copy" type="button" data-copy="cmd" aria-describedby="copy-status">Copy</button>
+          </div>
+          <p id="copy-status" class="sr" aria-live="polite"></p>
+          <p>Nothing will appear to happen. That’s correct — now open the app normally from Applications.</p>
+          <p class="quiet">What the line does: it removes the “downloaded from the internet” tag macOS put on EMS, which is what triggers the warning. It touches nothing else.</p>
+          <div class="alt">
+            <p><strong>Rather not use Terminal?</strong></p>
+            <p class="quiet" style="margin:0">Open EMS and let macOS block it. Then go to <span class="path">System Settings → Privacy &amp; Security</span>, scroll down, and click <strong>Open Anyway</strong> next to the message about EMS. Confirm when asked.</p>
+          </div>
+        </li>
+
+        <li>
+          <div class="step-head"><span class="step-num" aria-hidden="true">3</span><h3><span class="sr">Step 3: </span>Two permissions</h3></div>
+          <p>The first time EMS opens, its setup window walks you through both, with a button for each that takes you to the right place in System Settings.</p>
+          <ul class="extras" style="margin:0 0 14px">
+            <li><strong>Accessibility</strong> — lets EMS read what you’ve selected. It does this by pressing <kbd>⌘</kbd><kbd>C</kbd> for you.</li>
+            <li><strong>Screen Recording</strong> — only needed for the <kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd> screenshot key. Skip it if you only want text.</li>
+          </ul>
+          <p class="quiet">macOS may ask you to quit and reopen EMS after granting one of these. Let it.</p>
+        </li>
+
+        <li>
+          <div class="step-head"><span class="step-num" aria-hidden="true">4</span><h3><span class="sr">Step 4: </span>A free AI key</h3></div>
+          <p>Go to <a href="https://console.groq.com/keys">console.groq.com/keys</a>, sign up, and create a key. It’s free, needs no credit card, and takes about a minute.</p>
+          <p>The key starts with <code class="inline">gsk_</code>. <strong>Groq shows it only once</strong>, so copy it before closing that page.</p>
+          <div class="alt" style="margin:0 0 16px">
+            <p><strong>Or use Google Gemini, also free</strong></p>
+            <p class="quiet">If you already have a Google account, go to <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>, sign in, and click <strong>Create API key</strong>. No credit card. That key starts with <code class="inline">AIza</code>.</p>
+            <p class="quiet" style="margin:0">One difference: on Gemini’s free tier, Google may use what you explain to train its models. Groq doesn’t. If that matters for what you’ll be explaining, pick Groq.</p>
+          </div>
+          <p>Paste whichever key you made into EMS’s setup window. Done. Select some text and press <kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd>.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="privacy" aria-labelledby="privacy-h">
+    <div class="wrap">
+      <h2 id="privacy-h">Privacy</h2>
+      <p class="intro">Short version: what you explain goes only to the AI service you picked.</p>
+      <ul class="privacy">
+        <li>What you explain is sent to the AI provider you chose, using your own key. On <strong>Google Gemini’s free tier</strong> specifically, Google may use it to train their models. Groq and Anthropic do not.</li>
+        <li>Once a day EMS asks GitHub whether a newer version exists. That shows GitHub your IP address and macOS version — nothing about what you explain. You can switch it off in Settings.</li>
+        <li>Nothing else leaves your Mac. Your key is kept in the macOS Keychain. History and templates are stored locally.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Version history and older downloads: <a href="https://github.com/vadostuta/ems-releases/releases">GitHub releases</a>.</p>
+    <p>Feedback, a bug, or stuck on a step? Get in touch via <a href="https://vvasko.com">vvasko.com</a>.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var status = document.getElementById('copy-status');
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0, text.length);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch(e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  function selectText(el){
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  function done(btn, ok, el){
+    btn.textContent = ok ? 'Copied' : 'Press ⌘C';
+    status.textContent = ok ? 'Command copied to clipboard.' : 'Could not copy automatically. The command is selected; press Command C.';
+    if (!ok) selectText(el);
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function(){ btn.textContent = 'Copy'; status.textContent=''; }, 2200);
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      var text = el.textContent.trim();
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(function(){ done(btn, true, el); },
+          function(){ done(btn, fallbackCopy(text), el); });
+      } else {
+        done(btn, fallbackCopy(text), el);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
