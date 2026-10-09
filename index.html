@@ -6,6 +6,8 @@
 <title>EMS — explain me shit</title>
 <meta name="description" content="A small macOS menu bar app. Select anything on your screen, press a hotkey, and get it explained in plain language.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#E7E0BE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#24261A" media="(prefers-color-scheme: dark)">
 
 <link rel="icon" href="logo.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -19,262 +21,624 @@
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,800;0,900;1,600;1,700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#FFF7D9;
-  --surface:#FFFDF3;
-  --ink:#003631;
-  --muted:#3E5F59;
-  --line:#E9DCA8;
-  --accent:#003631;
-  --accent-ink:#FFEDA8;
-  --accent-hover:#00554C;
-  --note-bg:#FFEDA8;
-  --note-line:#DCC46A;
-  --note-ink:#003631;
-  --code-bg:#003631;
-  --code-ink:#FFEDA8;
-  --key-bg:#FFFDF3;
-  --key-line:#CFC089;
-  --key-shadow:#B9A96C;
-  --focus:#00554C;
-  --sans:"Newsreader",Georgia,"Times New Roman",serif;
-  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#003631;
-    --surface:#06443D;
-    --ink:#FFEDA8;
-    --muted:#CFC9A0;
-    --line:#175650;
-    --accent:#FFEDA8;
-    --accent-ink:#003631;
-    --accent-hover:#FFF6D2;
-    --note-bg:#1C4B39;
-    --note-line:#7D7A48;
-    --note-ink:#FFEDA8;
-    --code-bg:#00221F;
-    --code-ink:#FFEDA8;
-    --key-bg:#06443D;
-    --key-line:#2B6A61;
-    --key-shadow:#001C19;
-    --focus:#FFEDA8;
-  }
-}
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;background:var(--bg);color:var(--ink);
-  font-family:var(--sans);font-size:19px;line-height:1.55;
+body{margin:0}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:16px;top:16px;background:var(--card);color:var(--ink);padding:8px 12px;border-radius:8px;z-index:10}
+.em{
+  --haze:#E7E0BE; --haze-ink:#2B211A; --haze-muted:#5B5040;
+  --parchment:#F4EDDA; --ink:#2B211A; --muted:#64584A;
+  --card:#FBF6E8; --line:rgba(43,33,26,.16);
+  --cardinal:#B32E1D; --cardinal-ink:#FBF3DF; --cardinal-hover:#972313; --cardinal-2:#8F2415;
+  --olive:#4E6A2B; --olive-ink:#FBF3DF; --olive-muted:#E2E3C4;
+  --olive-deep:#2F4219; --olive-2:#3D5422; --olive-3:#22310F;
+  --gold:#E8B54A; --gold-soft:#F3E3B0;
+  --footer:#2B211A; --footer-ink:#F4EDDA; --footer-muted:#D6CBB0;
+  --display:"Fraunces","Iowan Old Style",Georgia,serif;
+  --text:"Newsreader",Georgia,"Times New Roman",serif;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-family:var(--text);font-size:19px;line-height:1.55;color:var(--ink);background:var(--parchment);
   -webkit-font-smoothing:antialiased;
 }
-a{color:var(--accent);text-underline-offset:2px}
-a:hover{color:var(--accent-hover)}
-:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
-.wrap{max-width:760px;margin:0 auto;padding:0 20px}
-.skip{position:absolute;left:-9999px}
-.skip:focus{left:16px;top:16px;background:var(--surface);padding:8px 12px;z-index:10}
+@media (prefers-color-scheme: dark){
+  .em{
+    --haze:#24261A; --haze-ink:#F1E8CF; --haze-muted:#CFC6A8;
+    --parchment:#1C1A13; --ink:#F1E8CF; --muted:#C9BFA4;
+    --card:#28251B; --line:rgba(241,232,207,.16);
+    --olive-deep:#1F2C10; --olive-2:#2C3D18; --olive-3:#16200A;
+    --footer:#120F0B;
+  }
+}
+.em *,.em *::before,.em *::after{box-sizing:border-box}
+.em a{color:inherit;text-decoration-thickness:1.5px;text-underline-offset:3px}
+.em a:hover{opacity:.8}
+.em :focus-visible{outline:3px solid currentColor;outline-offset:3px;border-radius:6px}
+.em p{margin:0 0 14px}
+.em h1,.em h2,.em h3{font-family:var(--display);margin:0;line-height:1}
+.inner{max-width:1160px;margin:0 auto;padding:0 24px}
+.band{padding:96px 0}
+.haze{background:var(--haze);color:var(--haze-ink)}
+.parch{background:var(--parchment);color:var(--ink)}
+.olive{background:var(--olive);color:var(--olive-ink)}
+.deep{background:var(--olive-deep);color:var(--olive-ink)}
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 18px}
+.num{font-family:var(--display);font-style:italic;font-weight:700;font-size:30px;line-height:1;color:var(--cardinal);margin:0 0 10px}
+.olive .num,.deep .num{color:var(--gold)}
 
 /* Hero */
-header.hero{padding:88px 0 72px;border-bottom:1px solid var(--line)}
-.mark{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--sans);font-style:italic;font-size:17px;color:var(--muted);margin-bottom:24px
-}
-.hero-grid{display:grid;gap:28px;align-items:center}
-@media (min-width:720px){.hero-grid{grid-template-columns:minmax(0,1fr) auto;gap:40px}}
-.logo{display:block;width:clamp(200px,30vw,280px);height:auto;aspect-ratio:1/1;margin:0 -12px 0 0}
-@media (max-width:719px){.logo{order:-1;width:150px;margin:0 0 0 -8px}}
-h1{font-size:clamp(44px,9vw,72px);line-height:1;letter-spacing:-.03em;margin:0 0 6px;font-weight:700}
-.expansion{font-family:var(--sans);font-style:italic;font-size:19px;color:var(--muted);margin:0 0 28px}
-.lede{font-size:clamp(21px,3.4vw,26px);line-height:1.35;margin:0 0 36px;max-width:30ch;font-weight:500;letter-spacing:-.01em}
-.btn{
-  display:inline-flex;align-items:center;gap:12px;
-  background:var(--accent);color:var(--accent-ink);
-  font-weight:600;font-size:19px;text-decoration:none;
-  padding:18px 30px;border-radius:12px;min-height:56px;
-  transition:background .15s ease
-}
-.btn:hover{background:var(--accent-hover);color:var(--accent-ink)}
-.btn svg{width:22px;height:22px;flex:none}
-.fine{font-size:15px;color:var(--muted);margin:14px 0 0}
-.next{font-size:15px;margin:22px 0 0}
+.hero{padding:64px 0 0;overflow:hidden}
+.hero-top{display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--haze-muted)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:48px;align-items:center;padding:40px 0 24px}
+.hero h1{font-size:clamp(120px,19vw,236px);font-weight:900;letter-spacing:-.045em;line-height:.82;color:var(--cardinal)}
+.hero .say{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(26px,3.4vw,40px);margin:16px 0 24px}
+.hero .lede{font-size:clamp(21px,2.2vw,25px);line-height:1.38;max-width:28ch;margin:0 0 32px}
+.btn{display:inline-flex;align-items:center;gap:14px;background:var(--cardinal);color:var(--cardinal-ink)!important;text-decoration:none;
+  font-family:var(--text);font-weight:600;font-size:21px;padding:20px 32px;border-radius:999px;min-height:60px;
+  box-shadow:0 6px 0 var(--cardinal-2)}
+.btn:hover{opacity:1!important;background:var(--cardinal-hover)}
+.btn svg{width:22px;height:22px}
+.fine{font-size:15px;color:var(--haze-muted);margin:16px 0 0}
+.hero .next{font-size:16px;margin:10px 0 0}
+.sticker{position:relative;justify-self:center}
+.appicon{display:block;width:clamp(280px,34vw,460px);height:auto;aspect-ratio:1/1;transform:rotate(4deg)}
+.sticker .tag{position:absolute;left:-6px;bottom:44px;background:var(--parchment);color:var(--ink);font-family:var(--display);font-style:italic;font-weight:700;
+  font-size:20px;padding:10px 18px;border-radius:999px;transform:rotate(-6deg);box-shadow:0 4px 0 rgba(43,33,26,.2)}
+.land{display:block;width:100%;height:clamp(110px,14vw,200px)}
 
+/* Shortcut strip */
+.strip{background:var(--cardinal);color:var(--cardinal-ink);padding:22px 0}
+.strip-row{display:flex;flex-wrap:wrap;gap:14px 40px;align-items:center;justify-content:space-between;font-family:var(--display);font-weight:600;font-style:italic;font-size:22px}
+.strip-row span{display:inline-flex;align-items:center;gap:12px}
+.strip kbd{background:var(--cardinal-2);color:var(--cardinal-ink);border-color:rgba(251,243,223,.3);box-shadow:0 2px 0 #5E160C;font-style:normal}
 
-/* Headings: Instrument Serif */
-.f-instrument h1,.f-instrument h2{font-family:"Instrument Serif",Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.01em}
-.f-instrument h1{font-size:clamp(64px,12vw,104px)}
-.f-instrument h2{font-size:clamp(36px,6vw,48px)}
+kbd{display:inline-flex;align-items:center;justify-content:center;min-width:1.9em;height:1.9em;padding:0 .45em;margin:0 1px;
+  font-family:var(--ui);font-size:.8em;font-weight:500;line-height:1;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:7px;box-shadow:0 2px 0 rgba(43,33,26,.28);vertical-align:.1em}
 
-/* Sections */
-section{padding:72px 0;border-bottom:1px solid var(--line)}
-h2{font-size:clamp(28px,5vw,36px);line-height:1.15;letter-spacing:-.02em;margin:0 0 12px;font-weight:700}
-h3{font-size:20px;line-height:1.3;margin:0 0 6px;font-weight:600}
-.intro{color:var(--muted);margin:0 0 36px;max-width:56ch}
-p{margin:0 0 14px}
+/* Section heads */
+.head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:end;margin-bottom:56px}
+.head h2{font-size:clamp(56px,8vw,104px);font-weight:900;letter-spacing:-.03em}
+.head p{font-size:21px;margin:0;max-width:40ch}
+.head > p::first-letter{font-family:var(--display);font-weight:900;font-style:italic;color:var(--cardinal);float:left;font-size:3.1em;line-height:.82;margin:4px 10px 0 0}
+.olive .head > p::first-letter,.deep .head > p::first-letter{color:var(--gold)}
 
-/* Keys */
-kbd{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:1.9em;height:1.9em;padding:0 .45em;margin:0 1px;
-  font-family:var(--ui);font-size:.82em;font-weight:500;line-height:1;
-  color:var(--ink);background:var(--key-bg);
-  border:1px solid var(--key-line);border-radius:6px;
-  box-shadow:0 2px 0 var(--key-shadow);vertical-align:.1em
-}
-.keys{display:inline-flex;align-items:center;gap:4px;margin-bottom:14px;font-size:20px;min-height:42px}
-.keys .icon{width:30px;height:30px;color:var(--muted)}
+/* Bento */
+.bento{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.tile{border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:14px;min-height:240px}
+.tile h3{font-size:32px;font-weight:800;letter-spacing:-.01em}
+.tile p{margin:0}
+.tile .keys{display:flex;gap:6px;font-size:30px}
+.tile.big{grid-row:span 2;background:var(--olive);color:var(--olive-ink);justify-content:space-between}
+.tile.big .keys{font-size:48px}
+.tile.big h3{font-size:44px}
+.tile.big kbd,.tile.red kbd{background:rgba(0,0,0,.18);color:inherit;border-color:rgba(251,243,223,.3);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.tile.red{background:var(--cardinal);color:var(--cardinal-ink)}
+.tile.light{background:var(--card);border:1px solid var(--line)}
+.tile.wide{grid-column:span 2;background:var(--card);border:1.5px dashed rgba(43,33,26,.4)}
+.tile .icon{width:44px;height:44px;color:var(--cardinal)}
+.bignum{font-family:var(--display);font-weight:900;font-size:96px;line-height:.9;letter-spacing:-.04em;color:var(--cardinal)}
 
-/* Capabilities */
-.caps{display:grid;gap:16px}
-.cap{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
-.cap p{margin:0;color:var(--muted)}
-.extras{margin:28px 0 0;padding:0;list-style:none;display:grid;gap:10px}
-.extras li{padding-left:22px;position:relative}
-.extras li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--muted)}
-.byok{margin-top:36px;padding:22px 24px;border:1px dashed var(--key-line);border-radius:14px}
-.byok h3{font-size:18px}
-.byok p{margin:0;color:var(--muted)}
-@media (min-width:720px){.caps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* Floating helper */
+.helpers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin:0;padding:0;list-style:none}
+.helper{background:var(--olive-2);border-radius:28px;padding:32px 28px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.helper svg{width:168px;height:168px;display:block;margin-bottom:6px}
+.helper h3{font-size:30px;font-weight:800}
+.helper p{margin:0;color:var(--olive-muted);font-size:18px;max-width:26ch}
 
 /* Templates */
-.chips{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
-.chips li{
-  font-size:15px;font-weight:500;padding:8px 14px;border-radius:999px;
-  border:1px solid var(--line);background:var(--surface)
-}
+.chips{display:flex;flex-wrap:wrap;gap:14px;margin:0;padding:0;list-style:none}
+.chips li{font-family:var(--display);font-weight:700;font-size:clamp(24px,3vw,34px);padding:12px 26px;border-radius:999px;border:2px solid currentColor}
+.chips li:nth-child(3n+1){background:var(--cardinal);color:var(--cardinal-ink);border-color:var(--cardinal)}
+.chips li.add{font-style:italic;border-style:dashed;opacity:.85}
 
 /* Setup */
-#setup h2 small{display:block;font-size:17px;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:6px}
-ol.steps{list-style:none;margin:40px 0 0;padding:0;display:grid;gap:20px;counter-reset:step}
-ol.steps>li{
-  counter-increment:step;position:relative;
-  background:var(--surface);border:1px solid var(--line);border-radius:16px;
-  padding:28px 24px 24px 24px
-}
-.step-head{display:flex;align-items:baseline;gap:14px;margin-bottom:12px}
-.step-num{
-  flex:none;display:inline-flex;align-items:center;justify-content:center;
-  width:40px;height:40px;border-radius:50%;
-  background:var(--ink);color:var(--bg);font-weight:700;font-size:18px;
-  transform:translateY(-2px)
-}
-.step-head h3{margin:0;font-size:22px}
-ol.steps p:last-child{margin-bottom:0}
-.note{
-  background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-ink);
-  border-radius:10px;padding:14px 16px;margin:0 0 18px
-}
-.note strong{font-weight:600}
-.howto{margin:0 0 16px;padding-left:22px}
+.setup-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:64px;align-items:start}
+.setup-side{position:sticky;top:32px}
+.setup-side h2{font-size:clamp(64px,8vw,112px);font-weight:900;letter-spacing:-.03em}
+.setup-side .mins{font-family:var(--display);font-style:italic;font-weight:700;font-size:30px;margin:16px 0 22px;color:var(--gold)}
+.setup-side p{color:var(--olive-muted);font-size:18px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:22px}
+.step{background:var(--olive-2);border-radius:26px;padding:34px 34px 30px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:8px 24px}
+.step .n{font-family:var(--display);font-weight:900;font-size:76px;line-height:.9;color:var(--gold);letter-spacing:-.02em}
+.step h3{font-size:34px;font-weight:800;margin:6px 0 16px}
+.step p:last-child{margin-bottom:0}
+.step .muted{color:var(--olive-muted);font-size:17px}
+.step kbd{background:var(--olive-3);color:var(--olive-ink);border-color:rgba(251,243,223,.25);box-shadow:0 2px 0 #121A07}
+.step code.inline{font-family:var(--mono);font-size:.88em;background:var(--olive-3);padding:2px 7px;border-radius:6px}
+.step a{color:var(--gold-soft)}
+.warn{background:var(--parchment);color:var(--ink);border-radius:18px;padding:18px 22px;margin:0 0 20px;border-left:0}
+.warn strong{font-weight:600}
+.howto{margin:0 0 14px;padding-left:22px}
 .howto li{margin-bottom:6px}
-.code{
-  display:flex;align-items:stretch;gap:0;margin:6px 0 14px;
-  background:var(--code-bg);color:var(--code-ink);border-radius:10px;overflow:hidden
-}
-.code code{
-  flex:1;min-width:0;font-family:var(--mono);font-size:15px;line-height:1.5;
-  padding:16px 18px;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch
-}
-.copy{
-  flex:none;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
-  background:transparent;color:var(--code-ink);
-  border:0;border-left:1px solid rgba(255,255,255,.16);
-  padding:0 18px;min-width:96px;min-height:48px
-}
-.copy:hover{background:rgba(255,255,255,.08)}
-.copy:focus-visible{outline-offset:-4px}
-.quiet{color:var(--muted);font-size:16px}
-.alt{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
-.path{font-weight:600}
-code.inline{font-family:var(--mono);font-size:.92em;background:var(--bg);border:1px solid var(--line);padding:1px 6px;border-radius:5px}
+.code{display:flex;background:var(--olive-3);border-radius:16px;overflow:hidden;margin:4px 0 16px;border:1px solid rgba(251,243,223,.14)}
+.code code{flex:1;min-width:0;font-family:var(--mono);font-size:15px;padding:18px 20px;white-space:pre;overflow-x:auto;color:var(--gold-soft)}
+.copy{flex:none;border:0;background:var(--gold);color:#2B211A;font-family:var(--text);font-weight:600;font-size:16px;padding:0 24px;min-width:104px;min-height:52px;cursor:pointer}
+.copy:hover{background:var(--gold-soft)}
+.alt{border-top:1px solid rgba(251,243,223,.2);margin-top:20px;padding-top:18px}
+.perm{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:12px}
+.perm li{background:var(--olive-3);border-radius:14px;padding:14px 18px}
 
 /* Privacy */
-.privacy{margin:0;padding:0;list-style:none;display:grid;gap:18px}
-.privacy li{padding-left:22px;position:relative}
-.privacy li::before{content:"";position:absolute;left:4px;top:.72em;width:7px;height:7px;border-radius:50%;background:var(--ink)}
+.priv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.priv-card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:30px}
+.priv-card .k{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+.priv-card h3{font-size:30px;font-weight:800;margin:0 0 12px}
+.priv-card p{margin:0;font-size:18px}
 
 /* Footer */
-footer{padding:48px 0 72px;color:var(--muted);font-size:15px}
-footer p{margin:0 0 8px}
+.foot{background:var(--footer);color:var(--footer-ink);padding:56px 0}
+.foot-row{display:flex;flex-wrap:wrap;gap:24px 48px;justify-content:space-between;align-items:center}
+.foot-brand{display:flex;align-items:center;gap:18px}
+.foot-brand svg{width:96px;height:96px;display:block}
+.foot .word{font-family:var(--display);font-weight:900;font-size:64px;line-height:.9;letter-spacing:-.03em}
+.foot p{margin:0 0 6px;color:var(--footer-muted);font-size:17px}
+.foot a{color:var(--footer-ink)}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-@media (max-width:480px){
-  body{font-size:18px}
-  header.hero{padding:56px 0 52px}
-  section{padding:56px 0}
-  .btn{width:100%;justify-content:center}
-  ol.steps>li{padding:22px 18px 20px}
-  .copy{min-width:80px;padding:0 14px}
+@media (max-width:860px){
+  .hero-grid,.head,.setup-grid{grid-template-columns:minmax(0,1fr)}
+  .sticker{order:-1}
+  .setup-side{position:static}
+  .bento,.priv,.helpers{grid-template-columns:minmax(0,1fr)}
+  .tile.big,.tile.wide{grid-row:auto;grid-column:auto}
+  .head{gap:16px;margin-bottom:36px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:520px){
+  .band{padding:64px 0}
+  .inner{padding:0 18px}
+  .btn{width:100%;justify-content:center}
+  .step{grid-template-columns:minmax(0,1fr);padding:26px 22px}
+  .step .n{font-size:56px}
+  .strip-row{font-size:18px}
+  .copy{min-width:84px;padding:0 16px}
+}
 </style>
 </head>
-<body class="f-instrument">
+<body class="em">
 <a class="skip" href="#setup">Skip to setup</a>
 
-<header class="hero">
-  <div class="wrap hero-grid">
-    <div class="hero-text">
-      <div class="mark">a menu bar app for macOS</div>
-      <h1>EMS</h1>
-      <p class="expansion">“explain me shit”</p>
-      <p class="lede">Select anything on your screen, press a hotkey, and get it explained in plain language, written for a beginner.</p>
-      <a class="btn" href="https://github.com/vadostuta/ems-releases/releases/latest/download/EMS.zip">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="M7 10.5 12 15.5 17 10.5"></path><path d="M5 19.5h14"></path></svg>
-        Download for Mac
-      </a>
-      <p class="fine">macOS 14 or newer · works on Apple Silicon and Intel · free</p>
-      <p class="fine" id="relinfo" hidden></p>
-      <p class="next">After downloading, follow the <a href="#setup">three-minute setup</a>. macOS will put up a warning; the setup explains it.</p>
+<header class="hero haze">
+  <div class="inner">
+    <div class="hero-top">
+      <span>EMS</span>
+      <span>a menu bar app for macOS</span>
     </div>
-    <img class="logo" src="logo.png" width="264" height="264" alt="EMS app icon">
+    <div class="hero-grid">
+      <div>
+        <h1>EMS</h1>
+        <p class="say">“explain me shit”</p>
+        <p class="lede">Select anything on your screen, press a hotkey, and get it explained in plain language, written for a beginner.</p>
+        <a class="btn" href="https://github.com/vadostuta/ems-releases/releases/latest/download/EMS.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"></path><path d="M7 10.5 12 15.5 17 10.5"></path><path d="M5 19.5h14"></path></svg>
+          Download for Mac
+        </a>
+        <p class="fine">macOS 14 or newer · works on Apple Silicon and Intel · free</p>
+        <p class="fine" id="relinfo" hidden></p>
+        <p class="next">Then follow the <a href="#setup">three-minute setup</a>. macOS will put up a warning; the setup explains it.</p>
+      </div>
+      <div class="sticker">
+        <svg class="appicon" viewBox="0 0 1024 1024" role="img" aria-label="EMS app icon: a little bishop on a garden path">
+<defs>
+<clipPath id="bpiClip"><rect x="100" y="100" width="824" height="824" rx="186"></rect></clipPath>
+<linearGradient id="bpiBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4BB78"></stop><stop offset="0.42" stop-color="#93A458"></stop><stop offset="1" stop-color="#5E7C34"></stop></linearGradient>
+<radialGradient id="bpiGlow" cx="0.78" cy="0.22" r="0.55"><stop offset="0" stop-color="#F6DC95" stop-opacity="0.85"></stop><stop offset="1" stop-color="#F6DC95" stop-opacity="0"></stop></radialGradient>
+<linearGradient id="bpiGloss" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.03"></stop></linearGradient>
+<radialGradient id="bpiVignette" cx="0.5" cy="0.5" r="0.72"><stop offset="0.6" stop-color="#2E3214" stop-opacity="0"></stop><stop offset="1" stop-color="#2E3214" stop-opacity="0.45"></stop></radialGradient>
+<linearGradient id="bpRobe" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E8553F"></stop><stop offset="0.55" stop-color="#D23A2A"></stop><stop offset="1" stop-color="#A82516"></stop></linearGradient>
+<linearGradient id="bpCape" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="#F06A50"></stop><stop offset="0.6" stop-color="#DE4632"></stop><stop offset="1" stop-color="#B42E1E"></stop></linearGradient>
+<radialGradient id="bpSkin" cx="0.38" cy="0.34" r="0.75"><stop offset="0" stop-color="#FAD9BC"></stop><stop offset="0.65" stop-color="#F1BF99"></stop><stop offset="1" stop-color="#DC9C7A"></stop></radialGradient>
+<linearGradient id="bpMitre" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#EF5C43"></stop><stop offset="1" stop-color="#BF301F"></stop></linearGradient>
+</defs>
+<rect x="92" y="114" width="840" height="840" rx="200" fill="#1E1C10" opacity="0.06"></rect>
+<rect x="98" y="112" width="828" height="828" rx="190" fill="#1E1C10" opacity="0.1"></rect>
+<rect x="102" y="110" width="820" height="820" rx="184" fill="#1E1C10" opacity="0.16"></rect>
+<g clip-path="url(#bpiClip)">
+<rect x="100" y="100" width="824" height="824" fill="url(#bpiBg)"></rect>
+<rect x="100" y="100" width="824" height="824" fill="url(#bpiGlow)"></rect>
+<path d="M100 450 C230 418 340 440 460 424 C610 404 760 438 924 410 L924 600 L100 600 Z" fill="#A3B062" opacity="0.85"></path>
+<path d="M100 540 C270 508 430 528 580 516 C730 504 830 520 924 510 L924 924 L100 924 Z" fill="#7D9944"></path>
+<path d="M100 600 C300 580 500 600 924 570 L924 640 C600 660 360 640 100 660 Z" fill="#8CA74E" opacity="0.6"></path>
+<path d="M214 562 C218 530 216 500 210 470 L228 470 C234 500 236 530 238 564 Z" fill="#6E5236"></path>
+<circle cx="220" cy="440" r="44" fill="#6F8A3E"></circle>
+<circle cx="258" cy="456" r="36" fill="#6F8A3E"></circle>
+<circle cx="186" cy="462" r="32" fill="#6F8A3E"></circle>
+<circle cx="228" cy="424" r="26" fill="#86A04C"></circle>
+<ellipse cx="818" cy="704" rx="80" ry="16" fill="#4F6A2A" opacity="0.5"></ellipse>
+<path d="M784 476 C760 446 740 424 716 412" fill="none" stroke="#6B4A2E" stroke-width="14" stroke-linecap="round"></path>
+<path d="M812 456 C836 424 866 404 896 396" fill="none" stroke="#6B4A2E" stroke-width="16" stroke-linecap="round"></path>
+<path d="M790 700 C798 610 794 510 776 430 L812 426 C828 510 834 610 846 704 Z" fill="#6B4A2E"></path>
+<path d="M812 430 C826 514 832 612 846 704 L830 704 C822 616 818 520 804 432 Z" fill="#4E3420" opacity="0.7"></path>
+<circle cx="770" cy="320" r="84" fill="#5E7A33"></circle>
+<circle cx="860" cy="290" r="100" fill="#5E7A33"></circle>
+<circle cx="900" cy="380" r="80" fill="#557030"></circle>
+<circle cx="820" cy="210" r="90" fill="#5E7A33"></circle>
+<circle cx="740" cy="230" r="60" fill="#668338"></circle>
+<circle cx="790" cy="270" r="46" fill="#7A9644"></circle>
+<circle cx="850" cy="200" r="40" fill="#7A9644"></circle>
+<path d="M100 720 C220 708 320 734 410 770 C510 812 630 838 760 868 C830 884 880 900 924 910 L924 948 C860 934 800 918 740 902 C610 872 490 846 392 806 C300 770 210 744 100 746 Z" fill="#E6D4A6"></path>
+<path d="M100 746 C210 744 300 770 392 806 C490 846 610 872 740 902 C800 918 860 934 924 948" fill="none" stroke="#C9B280" stroke-width="5" opacity="0.7"></path>
+<ellipse cx="830" cy="802" rx="56" ry="14" fill="#4F6A2A" opacity="0.45"></ellipse>
+<ellipse cx="880" cy="748" rx="40" ry="30" fill="#6F635B"></ellipse>
+<ellipse cx="800" cy="770" rx="52" ry="36" fill="#7A6E65"></ellipse>
+<ellipse cx="858" cy="796" rx="46" ry="32" fill="#6F635B"></ellipse>
+<ellipse cx="786" cy="756" rx="20" ry="10" fill="#968A80" opacity="0.8"></ellipse>
+<ellipse cx="846" cy="784" rx="16" ry="8" fill="#8A7E74" opacity="0.8"></ellipse>
+<circle cx="150" cy="842" r="60" fill="#57722F"></circle>
+<circle cx="214" cy="884" r="56" fill="#57722F"></circle>
+<circle cx="120" cy="902" r="50" fill="#4E682A"></circle>
+<circle cx="162" cy="822" r="30" fill="#6D8A3B"></circle>
+<circle cx="224" cy="866" r="24" fill="#6D8A3B"></circle>
+<ellipse cx="440" cy="814" rx="170" ry="24" fill="#3C3D1A" opacity="0.32"></ellipse>
+<g transform="translate(436 812) scale(4.2) translate(-68 -132)">
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" fill="url(#bpRobe)" stroke="#5A2618" stroke-width="1.5" stroke-linejoin="round"></path>
+<path d="M41 90 C35 102 31 114 28 124" fill="none" stroke="#F58A6E" stroke-width="3" stroke-linecap="round" opacity="0.8"></path>
+<g fill="none" stroke="#A82516" stroke-width="2" stroke-linecap="round" opacity="0.75">
+<path d="M52 104 C49 114 47 122 46 131"></path>
+<path d="M60 106 C59 116 58 124 58 132"></path>
+<path d="M68 106 C69 116 69 124 70 132"></path>
+<path d="M84 104 C88 114 91 122 93 131"></path>
+</g>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="1.3"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="1.3"></ellipse>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#4A2A16" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#9A6436" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M105 127 L105 44" fill="none" stroke="#C38A52" stroke-width="1.2" stroke-linecap="round"></path>
+<circle cx="102.8" cy="22.5" r="3.2" fill="#E8B54A" stroke="#5A2618" stroke-width="1.2"></circle>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" fill="url(#bpCape)" stroke="#5A2618" stroke-width="1.5" stroke-linejoin="round"></path>
+<g fill="none" stroke="#B42E1E" stroke-width="1.6" stroke-linecap="round" opacity="0.6">
+<path d="M57 77 C55 85 54.5 93 55.5 101"></path>
+<path d="M66 77 C66 85 66 93 66 102"></path>
+<path d="M75 77 C77 85 77.5 93 76.5 101"></path>
+</g>
+<path d="M35.5 95 C37 98 39.5 99 42.5 98.5 C56 102.3 76 102.3 89.5 98.5 C92.5 99 95 98 96.5 95" fill="none" stroke="#F7DCC6" stroke-width="2.6" stroke-linecap="round"></path>
+<circle cx="37" cy="106" r="5.8" fill="url(#bpSkin)" stroke="#5A2618" stroke-width="1.3"></circle>
+<circle cx="44.5" cy="55" r="4.5" fill="#EFB892" stroke="#5A2618" stroke-width="1.3"></circle>
+<circle cx="87.5" cy="55" r="4.5" fill="#EFB892" stroke="#5A2618" stroke-width="1.3"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" fill="url(#bpSkin)" stroke="#5A2618" stroke-width="1.5"></ellipse>
+<path d="M57 69.5 Q66 73.5 75 69.5" fill="none" stroke="#D9967A" stroke-width="1.6" stroke-linecap="round"></path>
+<ellipse cx="53" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="79" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="66" cy="58.5" rx="3" ry="2.3" fill="#E3A07E"></ellipse>
+<g fill="none" stroke="#6B4330" stroke-width="1.6" stroke-linecap="round">
+<path d="M54.5 47.5 Q58.5 45.5 62.5 47"></path>
+<path d="M69.5 47 Q73.5 45.5 77.5 47.5"></path>
+</g>
+<ellipse cx="58.5" cy="54" rx="2.5" ry="3" fill="#2B1A14"></ellipse>
+<circle cx="59.3" cy="52.9" r="0.8" fill="#FFFFFF"></circle>
+<ellipse cx="73.5" cy="54" rx="2.5" ry="3" fill="#2B1A14"></ellipse>
+<circle cx="74.3" cy="52.9" r="0.8" fill="#FFFFFF"></circle>
+<path d="M61.5 64.5 Q66 68 70.5 64.5" fill="none" stroke="#8A3B2E" stroke-width="2" stroke-linecap="round"></path>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" fill="#A82516" stroke="#5A2618" stroke-width="1.5" stroke-linejoin="round"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" fill="url(#bpMitre)" stroke="#5A2618" stroke-width="1.5" stroke-linejoin="round"></path>
+<path d="M63 34 C62.5 26 65.5 19 70 15" fill="none" stroke="#F7876B" stroke-width="1.6" stroke-linecap="round" opacity="0.8"></path>
+<path d="M72 15 L72 35" fill="none" stroke="#E8B54A" stroke-width="2" stroke-linecap="round"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" fill="#E8B54A" stroke="#5A2618" stroke-width="1.3" stroke-linejoin="round"></path>
+<circle cx="106" cy="90" r="6.5" fill="url(#bpSkin)" stroke="#5A2618" stroke-width="1.3"></circle>
+<path d="M102 92.5 Q106 94.5 110 92.5" fill="none" stroke="#D9967A" stroke-width="1.3" stroke-linecap="round"></path>
+</g>
+<rect x="100" y="100" width="824" height="824" fill="url(#bpiVignette)"></rect>
+<path d="M100 100 L924 100 L924 430 C720 392 360 396 100 462 Z" fill="url(#bpiGloss)"></path>
+<rect x="100" y="100" width="824" height="824" rx="186" fill="none" stroke="#2F3115" stroke-width="16" opacity="0.35"></rect>
+</g>
+<rect x="110" y="110" width="804" height="804" rx="176" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.5"></rect>
+<rect x="100" y="100" width="824" height="824" rx="186" fill="none" stroke="#4A4724" stroke-width="3" opacity="0.8"></rect>
+        </svg>
+        <span class="tag" aria-hidden="true">free, no account</span>
+      </div>
+    </div>
   </div>
+  <svg class="land" viewBox="0 0 1440 220" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<path d="M0 118 C200 88 380 108 560 94 C760 78 980 110 1180 90 C1300 78 1380 88 1440 84 L1440 220 L0 220 Z" fill="#B3B56F"></path>
+<circle cx="150" cy="104" r="26" fill="#7F9548"></circle>
+<circle cx="186" cy="98" r="22" fill="#7F9548"></circle>
+<circle cx="1240" cy="86" r="24" fill="#7F9548"></circle>
+<circle cx="1272" cy="92" r="18" fill="#7F9548"></circle>
+<path d="M0 150 C240 126 460 144 700 134 C940 124 1160 148 1440 128 L1440 220 L0 220 Z" fill="#93A458"></path>
+<path d="M296 150 C298 130 297 112 293 98 L303 98 C306 112 307 130 309 150 Z" fill="#6B4A2E"></path>
+<circle cx="300" cy="84" r="26" fill="#6F8A3E"></circle>
+<circle cx="322" cy="94" r="20" fill="#6F8A3E"></circle>
+<circle cx="280" cy="96" r="18" fill="#6F8A3E"></circle>
+<circle cx="304" cy="78" r="14" fill="#86A04C"></circle>
+<path d="M1094 162 C1098 130 1096 102 1088 80 L1104 80 C1110 102 1112 130 1114 162 Z" fill="#6B4A2E"></path>
+<circle cx="1100" cy="62" r="38" fill="#5E7A33"></circle>
+<circle cx="1132" cy="76" r="30" fill="#5E7A33"></circle>
+<circle cx="1068" cy="78" r="28" fill="#5E7A33"></circle>
+<circle cx="1108" cy="48" r="22" fill="#7A9644"></circle>
+<path d="M0 182 C300 166 600 180 900 172 C1140 166 1300 178 1440 172 L1440 220 L0 220 Z" fill="#6E8B3D"></path>
+<path d="M0 206 C240 196 420 188 600 192 C800 196 960 184 1120 174 C1240 166 1340 160 1440 158 L1440 168 C1340 172 1250 180 1128 190 C970 204 810 214 600 210 C420 206 250 216 0 222 Z" fill="#E6D4A6"></path>
+<ellipse cx="1240" cy="190" rx="22" ry="13" fill="#7A6E65"></ellipse>
+<ellipse cx="1268" cy="196" rx="18" ry="11" fill="#6F635B"></ellipse>
+<circle cx="60" cy="198" r="24" fill="#57722F"></circle>
+<circle cx="96" cy="206" r="20" fill="#57722F"></circle>
+  </svg>
 </header>
 
-<main>
-  <section id="what" aria-labelledby="what-h">
-    <div class="wrap">
-      <h2 id="what-h">What it does</h2>
-      <p class="intro">It sits in the menu bar. No Dock icon, no window. It shows up only when you press one of its keys.</p>
+<div class="strip" aria-hidden="true">
+  <div class="inner strip-row">
+    <span><kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd> explain text</span>
+    <span><kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd> explain a screenshot</span>
+    <span>then just ask a follow-up</span>
+  </div>
+</div>
 
-      <div class="caps">
-        <div class="cap">
-          <div class="keys" aria-label="Option Command E"><kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd></div>
-          <h3>Explain selected text</h3>
-          <p>Select text anywhere — a code editor, a web page, a database client — and press the keys. A small floating panel explains it.</p>
+<main>
+  <section class="band parch" aria-labelledby="what-h">
+    <div class="inner">
+      <div class="head">
+        <div>
+          <p class="num" aria-hidden="true">I.</p>
+          <h2 id="what-h">What it does</h2>
         </div>
-        <div class="cap">
+        <p>It sits in the menu bar. No Dock icon, no window. It shows up only when you press one of its keys.</p>
+      </div>
+      <div class="bento">
+        <div class="tile big">
+          <div class="keys" aria-label="Option Command E"><kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd></div>
+          <div>
+            <h3>Explain selected text</h3>
+            <p style="margin-top: 14px">Select text anywhere — a code editor, a web page, a database client — and press the keys. A small floating panel explains it.</p>
+          </div>
+        </div>
+        <div class="tile red">
           <div class="keys" aria-label="Option Command S"><kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd></div>
           <h3>Explain a screenshot</h3>
           <p>Drag a box around part of the screen instead. Good for charts, error dialogs and diagrams.</p>
         </div>
-        <div class="cap">
-          <div class="keys" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v10H9l-5 4z"/><path d="M8.5 10.5h7"/></svg></div>
+        <div class="tile light">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v10H9l-5 4z"></path><path d="M8.5 10.5h7"></path></svg>
           <h3>Ask follow-ups</h3>
           <p>Type a question in the same panel. It remembers the conversation, so “what does that part mean” works.</p>
         </div>
-      </div>
-
-      <ul class="extras">
-        <li>Keeps a history of your last 15 explanations, on your Mac.</li>
-      </ul>
-
-      <div class="byok">
-        <h3>It uses your own AI key</h3>
-        <p>EMS has no AI of its own. It connects to a free account you make with Groq or Google Gemini (or paid Anthropic, or any OpenAI-compatible service). That is why it is free, and why there is no EMS account to sign up for. Nobody pays for anyone else’s usage.</p>
+        <div class="tile light">
+          <div class="bignum">15</div>
+          <p>The history keeps your last 15 explanations, on your Mac.</p>
+        </div>
+        <div class="tile wide">
+          <h3>It uses your own AI key</h3>
+          <p>EMS has no AI of its own. It connects to a free account you make with Groq or Google Gemini (or paid Anthropic, or any OpenAI-compatible service). That is why it is free, and why there is no EMS account to sign up for. Nobody pays for anyone else’s usage.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="templates" aria-labelledby="templates-h">
-    <div class="wrap">
-      <h2 id="templates-h">Templates</h2>
-      <p>A template decides what kind of explainer EMS is: how it talks, what it assumes you know, what it focuses on. Six come with it. You can edit any of them, or write your own.</p>
+  <section class="band olive" aria-labelledby="helper-h">
+    <div class="inner">
+      <div class="head">
+        <div>
+          <p class="num" aria-hidden="true">II.</p>
+          <h2 id="helper-h">The floating helper</h2>
+        </div>
+        <p>Not a shortcuts person? A little bishop floats in a corner of your screen. Click him to ask a question, drop text or an image on him, or drag him anywhere.</p>
+      </div>
+      <ul class="helpers">
+        <li class="helper">
+          <svg viewBox="0 0 144 144" role="img" aria-label="The bishop at rest, holding his staff">
+<ellipse cx="68" cy="134" rx="42" ry="4.5" fill="#3A2219" opacity="0.1"></ellipse>
+<ellipse cx="68" cy="133.5" rx="30" ry="3" fill="#3A2219" opacity="0.14"></ellipse>
+<g fill="#FFFFFF" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" stroke-width="10.5"></path>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" stroke-width="10.5"></path>
+<circle cx="44.5" cy="55" r="4.5" stroke-width="10"></circle>
+<circle cx="87.5" cy="55" r="4.5" stroke-width="10"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" stroke-width="10.5"></ellipse>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" stroke-width="10.5"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" stroke-width="10.5"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" stroke-width="10"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke-width="15.5"></path>
+<circle cx="102.8" cy="22.5" r="3.2" stroke-width="9.5"></circle>
+<circle cx="106" cy="90" r="6.5" stroke-width="10"></circle>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<circle cx="37" cy="106" r="5.8" stroke-width="10"></circle>
+</g>
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" fill="url(#bpRobe)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M41 90 C35 102 31 114 28 124" fill="none" stroke="#F58A6E" stroke-width="3" stroke-linecap="round" opacity="0.8"></path>
+<g fill="none" stroke="#A82516" stroke-width="2.5" stroke-linecap="round" opacity="0.75">
+<path d="M52 104 C49 114 47 122 46 131"></path>
+<path d="M68 106 C69 116 69 124 70 132"></path>
+<path d="M84 104 C88 114 91 122 93 131"></path>
+</g>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#3A2219" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#9A6436" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M105 127 L105 44" fill="none" stroke="#C38A52" stroke-width="1.4" stroke-linecap="round"></path>
+<circle cx="102.8" cy="22.5" r="3.2" fill="#E8B54A" stroke="#3A2219" stroke-width="2.5"></circle>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" fill="url(#bpCape)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<g fill="none" stroke="#B42E1E" stroke-width="2" stroke-linecap="round" opacity="0.6">
+<path d="M57 77 C55 85 54.5 93 55.5 101"></path>
+<path d="M75 77 C77 85 77.5 93 76.5 101"></path>
+</g>
+<path d="M35.5 95 C37 98 39.5 99 42.5 98.5 C56 102.3 76 102.3 89.5 98.5 C92.5 99 95 98 96.5 95" fill="none" stroke="#F7DCC6" stroke-width="3" stroke-linecap="round"></path>
+<circle cx="37" cy="106" r="5.8" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="44.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="87.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3.5"></ellipse>
+<path d="M57 69.5 Q66 73.5 75 69.5" fill="none" stroke="#D9967A" stroke-width="2" stroke-linecap="round"></path>
+<ellipse cx="53" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="79" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="66" cy="58.5" rx="3" ry="2.3" fill="#E3A07E"></ellipse>
+<g fill="none" stroke="#6B4330" stroke-width="2" stroke-linecap="round">
+<path d="M54.5 47.5 Q58.5 45.5 62.5 47"></path>
+<path d="M69.5 47 Q73.5 45.5 77.5 47.5"></path>
+</g>
+<ellipse cx="58.5" cy="54" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<circle cx="59.4" cy="52.8" r="0.9" fill="#FFFFFF"></circle>
+<ellipse cx="73.5" cy="54" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<circle cx="74.4" cy="52.8" r="0.9" fill="#FFFFFF"></circle>
+<path d="M61.5 64.5 Q66 68 70.5 64.5" fill="none" stroke="#8A3B2E" stroke-width="2.4" stroke-linecap="round"></path>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" fill="#A82516" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" fill="url(#bpMitre)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M63 34 C62.5 26 65.5 19 70 15" fill="none" stroke="#F7876B" stroke-width="2" stroke-linecap="round" opacity="0.8"></path>
+<path d="M72 15 L72 35" fill="none" stroke="#E8B54A" stroke-width="2.5" stroke-linecap="round"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" fill="#E8B54A" stroke="#3A2219" stroke-width="3" stroke-linejoin="round"></path>
+<circle cx="106" cy="90" r="6.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+<path d="M102 92.5 Q106 94.5 110 92.5" fill="none" stroke="#D9967A" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+          <h3>At rest</h3>
+          <p>Sits quietly in a corner until you need him.</p>
+        </li>
+        <li class="helper">
+          <svg viewBox="0 0 144 144" role="img" aria-label="The bishop waving, ready for a drop">
+<ellipse cx="68" cy="134" rx="42" ry="4.5" fill="#3A2219" opacity="0.1"></ellipse>
+<ellipse cx="68" cy="133.5" rx="30" ry="3" fill="#3A2219" opacity="0.14"></ellipse>
+<g fill="#FFFFFF" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" stroke-width="10.5"></path>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" stroke-width="10.5"></path>
+<circle cx="44.5" cy="55" r="4.5" stroke-width="10"></circle>
+<circle cx="87.5" cy="55" r="4.5" stroke-width="10"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" stroke-width="10.5"></ellipse>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" stroke-width="10.5"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" stroke-width="10.5"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" stroke-width="10"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke-width="15.5"></path>
+<circle cx="102.8" cy="22.5" r="3.2" stroke-width="9.5"></circle>
+<circle cx="106" cy="90" r="6.5" stroke-width="10"></circle>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<path d="M37 92 C32 86 30 78 30 70" fill="none" stroke-width="18.5"></path>
+<ellipse cx="30" cy="64" rx="6.8" ry="7.5" stroke-width="10"></ellipse>
+<ellipse cx="36.2" cy="66" rx="2.4" ry="3.2" transform="rotate(25 36.2 66)" stroke-width="9"></ellipse>
+</g>
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" fill="url(#bpRobe)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M41 90 C35 102 31 114 28 124" fill="none" stroke="#F58A6E" stroke-width="3" stroke-linecap="round" opacity="0.8"></path>
+<g fill="none" stroke="#A82516" stroke-width="2.5" stroke-linecap="round" opacity="0.75">
+<path d="M52 104 C49 114 47 122 46 131"></path>
+<path d="M68 106 C69 116 69 124 70 132"></path>
+<path d="M84 104 C88 114 91 122 93 131"></path>
+</g>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#3A2219" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#9A6436" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M105 127 L105 44" fill="none" stroke="#C38A52" stroke-width="1.4" stroke-linecap="round"></path>
+<circle cx="102.8" cy="22.5" r="3.2" fill="#E8B54A" stroke="#3A2219" stroke-width="2.5"></circle>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" fill="url(#bpCape)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<g fill="none" stroke="#B42E1E" stroke-width="2" stroke-linecap="round" opacity="0.6">
+<path d="M57 77 C55 85 54.5 93 55.5 101"></path>
+<path d="M75 77 C77 85 77.5 93 76.5 101"></path>
+</g>
+<path d="M35.5 95 C37 98 39.5 99 42.5 98.5 C56 102.3 76 102.3 89.5 98.5 C92.5 99 95 98 96.5 95" fill="none" stroke="#F7DCC6" stroke-width="3" stroke-linecap="round"></path>
+<path d="M37 92 C32 86 30 78 30 70" fill="none" stroke="#3A2219" stroke-width="11.5" stroke-linecap="round"></path>
+<path d="M37 92 C32 86 30 78 30 70" fill="none" stroke="#DE4632" stroke-width="7.5" stroke-linecap="round"></path>
+<path d="M26.5 72 L33.5 72" fill="none" stroke="#F7DCC6" stroke-width="2.5" stroke-linecap="round"></path>
+<ellipse cx="36.2" cy="66" rx="2.4" ry="3.2" transform="rotate(25 36.2 66)" fill="#F1BF99" stroke="#3A2219" stroke-width="2.2"></ellipse>
+<ellipse cx="30" cy="64" rx="6.8" ry="7.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></ellipse>
+<circle cx="44.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="87.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3.5"></ellipse>
+<path d="M57 69.5 Q66 73.5 75 69.5" fill="none" stroke="#D9967A" stroke-width="2" stroke-linecap="round"></path>
+<ellipse cx="53" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="79" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="66" cy="58.5" rx="3" ry="2.3" fill="#E3A07E"></ellipse>
+<g fill="none" stroke="#6B4330" stroke-width="2" stroke-linecap="round">
+<path d="M54 45.8 Q58.5 43 63 45.2"></path>
+<path d="M69 45.2 Q73.5 43 78 45.8"></path>
+</g>
+<ellipse cx="58.5" cy="53.5" rx="3.2" ry="4" fill="#2B1A14"></ellipse>
+<circle cx="59.6" cy="52" r="1.1" fill="#FFFFFF"></circle>
+<ellipse cx="73.5" cy="53.5" rx="3.2" ry="4" fill="#2B1A14"></ellipse>
+<circle cx="74.6" cy="52" r="1.1" fill="#FFFFFF"></circle>
+<path d="M60.5 62.5 Q66 64 71.5 62.5 Q71 69.5 66 69.5 Q61 69.5 60.5 62.5 Z" fill="#6E2A22" stroke="#6E2A22" stroke-width="1.5" stroke-linejoin="round"></path>
+<ellipse cx="66" cy="67.6" rx="3" ry="1.5" fill="#E8766A"></ellipse>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" fill="#A82516" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" fill="url(#bpMitre)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M63 34 C62.5 26 65.5 19 70 15" fill="none" stroke="#F7876B" stroke-width="2" stroke-linecap="round" opacity="0.8"></path>
+<path d="M72 15 L72 35" fill="none" stroke="#E8B54A" stroke-width="2.5" stroke-linecap="round"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" fill="#E8B54A" stroke="#3A2219" stroke-width="3" stroke-linejoin="round"></path>
+<circle cx="106" cy="90" r="6.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+<path d="M102 92.5 Q106 94.5 110 92.5" fill="none" stroke="#D9967A" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+          <h3>Drop it here</h3>
+          <p>Hover over him, or drag text or an image onto him.</p>
+        </li>
+        <li class="helper">
+          <svg viewBox="0 0 144 144" role="img" aria-label="The bishop thinking, hand on chin">
+<ellipse cx="68" cy="134" rx="42" ry="4.5" fill="#3A2219" opacity="0.1"></ellipse>
+<ellipse cx="68" cy="133.5" rx="30" ry="3" fill="#3A2219" opacity="0.14"></ellipse>
+<g fill="#FFFFFF" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" stroke-width="10.5"></path>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" stroke-width="10.5"></path>
+<circle cx="44.5" cy="55" r="4.5" stroke-width="10"></circle>
+<circle cx="87.5" cy="55" r="4.5" stroke-width="10"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" stroke-width="10.5"></ellipse>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" stroke-width="10.5"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" stroke-width="10.5"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" stroke-width="10"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke-width="15.5"></path>
+<circle cx="102.8" cy="22.5" r="3.2" stroke-width="9.5"></circle>
+<circle cx="106" cy="90" r="6.5" stroke-width="10"></circle>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+</g>
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" fill="url(#bpRobe)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M41 90 C35 102 31 114 28 124" fill="none" stroke="#F58A6E" stroke-width="3" stroke-linecap="round" opacity="0.8"></path>
+<g fill="none" stroke="#A82516" stroke-width="2.5" stroke-linecap="round" opacity="0.75">
+<path d="M52 104 C49 114 47 122 46 131"></path>
+<path d="M68 106 C69 116 69 124 70 132"></path>
+<path d="M84 104 C88 114 91 122 93 131"></path>
+</g>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#3A2219" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#9A6436" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M105 127 L105 44" fill="none" stroke="#C38A52" stroke-width="1.4" stroke-linecap="round"></path>
+<circle cx="102.8" cy="22.5" r="3.2" fill="#E8B54A" stroke="#3A2219" stroke-width="2.5"></circle>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" fill="url(#bpCape)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<g fill="none" stroke="#B42E1E" stroke-width="2" stroke-linecap="round" opacity="0.6">
+<path d="M57 77 C55 85 54.5 93 55.5 101"></path>
+<path d="M75 77 C77 85 77.5 93 76.5 101"></path>
+</g>
+<path d="M35.5 95 C37 98 39.5 99 42.5 98.5 C56 102.3 76 102.3 89.5 98.5 C92.5 99 95 98 96.5 95" fill="none" stroke="#F7DCC6" stroke-width="3" stroke-linecap="round"></path>
+<path d="M40 97 C44 89 49 82 54 78" fill="none" stroke="#3A2219" stroke-width="11.5" stroke-linecap="round"></path>
+<path d="M40 97 C44 89 49 82 54 78" fill="none" stroke="#DE4632" stroke-width="7.5" stroke-linecap="round"></path>
+<circle cx="44.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="87.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3.5"></ellipse>
+<path d="M57 69.5 Q66 73.5 75 69.5" fill="none" stroke="#D9967A" stroke-width="2" stroke-linecap="round"></path>
+<ellipse cx="53" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="79" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="66" cy="58.5" rx="3" ry="2.3" fill="#E3A07E"></ellipse>
+<g fill="none" stroke="#6B4330" stroke-width="2" stroke-linecap="round">
+<path d="M54.5 46.5 Q58.5 45.5 62.5 46.5"></path>
+<path d="M69.5 45 Q73.5 42.5 77.5 44.5"></path>
+</g>
+<ellipse cx="60" cy="52" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<circle cx="60.9" cy="50.8" r="0.9" fill="#FFFFFF"></circle>
+<ellipse cx="75" cy="52" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<circle cx="75.9" cy="50.8" r="0.9" fill="#FFFFFF"></circle>
+<ellipse cx="68" cy="65.5" rx="2.3" ry="2.6" fill="#6E2A22"></ellipse>
+<ellipse cx="56.5" cy="74.5" rx="6" ry="5.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></ellipse>
+<path d="M53 72.5 Q56.5 71 60 72.5" fill="none" stroke="#D9967A" stroke-width="1.5" stroke-linecap="round"></path>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" fill="#A82516" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" fill="url(#bpMitre)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M63 34 C62.5 26 65.5 19 70 15" fill="none" stroke="#F7876B" stroke-width="2" stroke-linecap="round" opacity="0.8"></path>
+<path d="M72 15 L72 35" fill="none" stroke="#E8B54A" stroke-width="2.5" stroke-linecap="round"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" fill="#E8B54A" stroke="#3A2219" stroke-width="3" stroke-linejoin="round"></path>
+<circle cx="106" cy="90" r="6.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+<path d="M102 92.5 Q106 94.5 110 92.5" fill="none" stroke="#D9967A" stroke-width="1.6" stroke-linecap="round"></path>
+<path d="M126 30 Q127.1 34.4 131.5 35.5 Q127.1 36.6 126 41 Q124.9 36.6 120.5 35.5 Q124.9 34.4 126 30 Z" fill="#F2C14E" stroke="#3A2219" stroke-width="1.6" stroke-linejoin="round"></path>
+<path d="M95 5 Q95.8 8.2 99 9 Q95.8 9.8 95 13 Q94.2 9.8 91 9 Q94.2 8.2 95 5 Z" fill="#F2C14E" stroke="#3A2219" stroke-width="1.4" stroke-linejoin="round"></path>
+          </svg>
+          <h3>Thinking</h3>
+          <p>Busy while your answer is being written.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band haze" aria-labelledby="templates-h">
+    <div class="inner">
+      <div class="head">
+        <div>
+          <p class="num" aria-hidden="true">III.</p>
+          <h2 id="templates-h">Templates</h2>
+        </div>
+        <p>A template decides what kind of explainer EMS is: how it talks, what it assumes you know, what it focuses on. Six come with it. You can edit any of them, or write your own.</p>
+      </div>
       <ul class="chips" aria-label="Included templates">
         <li>SQL</li>
         <li>Maths</li>
@@ -282,86 +646,168 @@ footer p{margin:0 0 8px}
         <li>Driving theory</li>
         <li>Plain English rewriter</li>
         <li>Polish grammar</li>
+        <li class="add">+ your own</li>
       </ul>
     </div>
   </section>
 
-  <section id="setup" aria-labelledby="setup-h">
-    <div class="wrap">
-      <h2 id="setup-h">Setup<small>About three minutes. Do the steps in order.</small></h2>
+  <section class="band deep" id="setup" aria-labelledby="setup-h">
+    <div class="inner setup-grid">
+      <div class="setup-side">
+        <p class="eyebrow">IV. Read this part</p>
+        <h2 id="setup-h">Setup</h2>
+        <p class="mins">about three minutes</p>
+        <p>Do the steps in order. Step II is the one people get stuck on, and it takes one line.</p>
+      </div>
 
       <ol class="steps">
-        <li>
-          <div class="step-head"><span class="step-num" aria-hidden="true">1</span><h3><span class="sr">Step 1: </span>Install</h3></div>
-          <p>Open your Downloads folder. If you see <code class="inline">EMS.zip</code> instead of EMS, double-click it to unzip.</p>
-          <p>Drag <strong>EMS</strong> into your <strong>Applications</strong> folder. Don’t open it yet.</p>
-        </li>
-
-        <li>
-          <div class="step-head"><span class="step-num" aria-hidden="true">2</span><h3><span class="sr">Step 2: </span>Get past the security warning</h3></div>
-          <div class="note">
-            <p><strong>macOS will say EMS “is damaged” or “cannot be opened”. It isn’t damaged.</strong></p>
-            <p style="margin:0">That is what macOS says about any app that isn’t signed with a paid Apple developer account. EMS isn’t, and it isn’t from the App Store. The fix is one line.</p>
-          </div>
-          <ol class="howto">
-            <li>Open Terminal: press <kbd>⌘</kbd><kbd>Space</kbd>, type <strong>Terminal</strong>, press <kbd>Return</kbd>.</li>
-            <li>Copy this line, paste it into Terminal, press <kbd>Return</kbd>.</li>
-          </ol>
-          <div class="code">
-            <code id="cmd">xattr -dr com.apple.quarantine /Applications/EMS.app</code>
-            <button class="copy" type="button" data-copy="cmd" aria-describedby="copy-status">Copy</button>
-          </div>
-          <p id="copy-status" class="sr" aria-live="polite"></p>
-          <p>Nothing will appear to happen. That’s correct — now open the app normally from Applications.</p>
-          <p class="quiet">What the line does: it removes the “downloaded from the internet” tag macOS put on EMS, which is what triggers the warning. It touches nothing else.</p>
-          <div class="alt">
-            <p><strong>Rather not use Terminal?</strong></p>
-            <p class="quiet" style="margin:0">Open EMS and let macOS block it. Then go to <span class="path">System Settings → Privacy &amp; Security</span>, scroll down, and click <strong>Open Anyway</strong> next to the message about EMS. Confirm when asked.</p>
+        <li class="step">
+          <span class="n" aria-hidden="true">I</span>
+          <div>
+            <h3><span class="sr">Step 1: </span>Install</h3>
+            <p>Open your Downloads folder. If you see <code class="inline">EMS.zip</code> instead of EMS, double-click it to unzip.</p>
+            <p>Drag <strong>EMS</strong> into your <strong>Applications</strong> folder. Don’t open it yet.</p>
           </div>
         </li>
 
-        <li>
-          <div class="step-head"><span class="step-num" aria-hidden="true">3</span><h3><span class="sr">Step 3: </span>Two permissions</h3></div>
-          <p>The first time EMS opens, its setup window walks you through both, with a button for each that takes you to the right place in System Settings.</p>
-          <ul class="extras" style="margin:0 0 14px">
-            <li><strong>Accessibility</strong> — lets EMS read what you’ve selected. It does this by pressing <kbd>⌘</kbd><kbd>C</kbd> for you.</li>
-            <li><strong>Screen Recording</strong> — only needed for the <kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd> screenshot key. Skip it if you only want text.</li>
-          </ul>
-          <p class="quiet">macOS may ask you to quit and reopen EMS after granting one of these. Let it.</p>
+        <li class="step">
+          <span class="n" aria-hidden="true">II</span>
+          <div>
+            <h3><span class="sr">Step 2: </span>Get past the security warning</h3>
+            <div class="warn">
+              <p><strong>macOS will say EMS “is damaged” or “cannot be opened”. It isn’t damaged.</strong></p>
+              <p style="margin: 0">That is what macOS says about any app that isn’t signed with a paid Apple developer account. EMS isn’t, and it isn’t from the App Store. The fix is one line.</p>
+            </div>
+            <ol class="howto">
+              <li>Open Terminal: press <kbd>⌘</kbd><kbd>Space</kbd>, type <strong>Terminal</strong>, press <kbd>Return</kbd>.</li>
+              <li>Copy this line, paste it into Terminal, press <kbd>Return</kbd>.</li>
+            </ol>
+            <div class="code">
+              <code id="cmd">xattr -dr com.apple.quarantine /Applications/EMS.app</code>
+              <button class="copy" type="button" data-copy="cmd" aria-describedby="copy-status">Copy</button>
+            </div>
+            <p id="copy-status" class="sr" aria-live="polite"></p>
+            <p>Nothing will appear to happen. That’s correct — now open the app normally from Applications.</p>
+            <p class="muted">What the line does: it removes the “downloaded from the internet” tag macOS put on EMS, which is what triggers the warning. It touches nothing else.</p>
+            <div class="alt">
+              <p><strong>Rather not use Terminal?</strong></p>
+              <p class="muted" style="margin: 0">Open EMS and let macOS block it. Then go to <strong>System Settings → Privacy &amp; Security</strong>, scroll down, and click <strong>Open Anyway</strong> next to the message about EMS. Confirm when asked.</p>
+            </div>
+          </div>
         </li>
 
-        <li>
-          <div class="step-head"><span class="step-num" aria-hidden="true">4</span><h3><span class="sr">Step 4: </span>A free AI key</h3></div>
-          <p>Go to <a href="https://console.groq.com/keys">console.groq.com/keys</a>, sign up, and create a key. It’s free, needs no credit card, and takes about a minute.</p>
-          <p>The key starts with <code class="inline">gsk_</code>. <strong>Groq shows it only once</strong>, so copy it before closing that page.</p>
-          <div class="alt" style="margin:0 0 16px">
-            <p><strong>Or use Google Gemini, also free</strong></p>
-            <p class="quiet">If you already have a Google account, go to <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>, sign in, and click <strong>Create API key</strong>. No credit card. That key starts with <code class="inline">AIza</code>.</p>
-            <p class="quiet" style="margin:0">One difference: on Gemini’s free tier, Google may use what you explain to train its models. Groq doesn’t. If that matters for what you’ll be explaining, pick Groq.</p>
+        <li class="step">
+          <span class="n" aria-hidden="true">III</span>
+          <div>
+            <h3><span class="sr">Step 3: </span>Two permissions</h3>
+            <p>The first time EMS opens, its setup window walks you through both, with a button for each that takes you to the right place in System Settings.</p>
+            <ul class="perm">
+              <li><strong>Accessibility</strong> — lets EMS read what you’ve selected. It does this by pressing <kbd>⌘</kbd><kbd>C</kbd> for you.</li>
+              <li><strong>Screen Recording</strong> — only needed for the <kbd>⌥</kbd><kbd>⌘</kbd><kbd>S</kbd> screenshot key. Skip it if you only want text.</li>
+            </ul>
+            <p class="muted">macOS may ask you to quit and reopen EMS after granting one of these. Let it.</p>
           </div>
-          <p>Paste whichever key you made into EMS’s setup window. Done. Select some text and press <kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd>.</p>
+        </li>
+
+        <li class="step">
+          <span class="n" aria-hidden="true">IV</span>
+          <div>
+            <h3><span class="sr">Step 4: </span>A free AI key</h3>
+            <p>Go to <a href="https://console.groq.com/keys">console.groq.com/keys</a>, sign up, and create a key. It’s free, needs no credit card, and takes about a minute.</p>
+            <p>The key starts with <code class="inline">gsk_</code>. <strong>Groq shows it only once</strong>, so copy it before closing that page.</p>
+            <div class="alt" style="margin: 0 0 18px">
+              <p><strong>Or use Google Gemini, also free</strong></p>
+              <p class="muted">If you already have a Google account, go to <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>, sign in, and click <strong>Create API key</strong>. No credit card. That key starts with <code class="inline">AIza</code>.</p>
+              <p class="muted" style="margin: 0">One difference: on Gemini’s free tier, Google may use what you explain to train its models. Groq doesn’t. If that matters for what you’ll be explaining, pick Groq.</p>
+            </div>
+            <p>Paste whichever key you made into EMS’s setup window. Done. Select some text and press <kbd>⌥</kbd><kbd>⌘</kbd><kbd>E</kbd>.</p>
+          </div>
         </li>
       </ol>
     </div>
   </section>
 
-  <section id="privacy" aria-labelledby="privacy-h">
-    <div class="wrap">
-      <h2 id="privacy-h">Privacy</h2>
-      <p class="intro">Short version: what you explain goes only to the AI service you picked.</p>
-      <ul class="privacy">
-        <li>What you explain is sent to the AI provider you chose, using your own key. On <strong>Google Gemini’s free tier</strong> specifically, Google may use it to train their models. Groq and Anthropic do not.</li>
-        <li>Once a day EMS asks GitHub whether a newer version exists. That shows GitHub your IP address and macOS version — nothing about what you explain. You can switch it off in Settings.</li>
-        <li>Nothing else leaves your Mac. Your key is kept in the macOS Keychain. History and templates are stored locally.</li>
-      </ul>
+  <section class="band parch" aria-labelledby="privacy-h">
+    <div class="inner">
+      <div class="head">
+        <div>
+          <p class="num" aria-hidden="true">V.</p>
+          <h2 id="privacy-h">Privacy</h2>
+        </div>
+        <p>Short version: what you explain goes only to the AI service you picked.</p>
+      </div>
+      <div class="priv">
+        <div class="priv-card">
+          <p class="k">01 · your explanations</p>
+          <h3>Sent to your provider</h3>
+          <p>What you explain is sent to the AI provider you chose, using your own key. On <strong>Google Gemini’s free tier</strong> specifically, Google may use it to train their models. Groq and Anthropic do not.</p>
+        </div>
+        <div class="priv-card">
+          <p class="k">02 · update check</p>
+          <h3>Once a day, to GitHub</h3>
+          <p>EMS asks GitHub whether a newer version exists. That shows GitHub your IP address and macOS version — nothing about what you explain. You can switch it off in Settings.</p>
+        </div>
+        <div class="priv-card">
+          <p class="k">03 · everything else</p>
+          <h3>Stays on your Mac</h3>
+          <p>Your key is kept in the macOS Keychain. History and templates are stored locally.</p>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <p>Version history and older downloads: <a href="https://github.com/vadostuta/ems-releases/releases">GitHub releases</a>.</p>
-    <p>Feedback, a bug, or stuck on a step? Get in touch via <a href="https://vvasko.com">vvasko.com</a>.</p>
+<footer class="foot">
+  <div class="inner foot-row">
+    <div class="foot-brand">
+      <svg viewBox="0 0 144 144" aria-hidden="true">
+<ellipse cx="68" cy="134" rx="42" ry="4.5" fill="#000000" opacity="0.2"></ellipse>
+<g fill="#FFFFFF" stroke="#FFFFFF" stroke-linejoin="round" stroke-linecap="round">
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" stroke-width="10.5"></path>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" stroke-width="10.5"></path>
+<circle cx="44.5" cy="55" r="4.5" stroke-width="10"></circle>
+<circle cx="87.5" cy="55" r="4.5" stroke-width="10"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" stroke-width="10.5"></ellipse>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" stroke-width="10.5"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" stroke-width="10.5"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" stroke-width="10"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke-width="15.5"></path>
+<circle cx="102.8" cy="22.5" r="3.2" stroke-width="9.5"></circle>
+<circle cx="106" cy="90" r="6.5" stroke-width="10"></circle>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" stroke-width="10"></ellipse>
+<circle cx="37" cy="106" r="5.8" stroke-width="10"></circle>
+</g>
+<path d="M46 74 C36 92 28 110 23 124 C22 128 25 131 31 131 C52 133 80 133 101 131 C107 131 110 128 109 124 C104 110 96 92 86 74 Z" fill="url(#bpRobe)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<ellipse cx="52" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<ellipse cx="80" cy="132" rx="7" ry="3.2" fill="#4A2E22" stroke="#3A2219" stroke-width="3"></ellipse>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#3A2219" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M106 131 L106 42 C106 35 114 33 118 28 C122.5 22 120 13.5 112.5 12.5 C105.5 11.5 101 16.5 102.5 22" fill="none" stroke="#9A6436" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="102.8" cy="22.5" r="3.2" fill="#E8B54A" stroke="#3A2219" stroke-width="2.5"></circle>
+<path d="M50 70 C40 74 33 84 33 94 C33 99 37 102 42 101 C56 105 76 105 90 101 C95 102 99 99 99 94 C99 84 92 74 82 70 Z" fill="url(#bpCape)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M35.5 95 C37 98 39.5 99 42.5 98.5 C56 102.3 76 102.3 89.5 98.5 C92.5 99 95 98 96.5 95" fill="none" stroke="#F7DCC6" stroke-width="3" stroke-linecap="round"></path>
+<circle cx="37" cy="106" r="5.8" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="44.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<circle cx="87.5" cy="55" r="4.5" fill="#EFB892" stroke="#3A2219" stroke-width="3"></circle>
+<ellipse cx="66" cy="53" rx="22" ry="20.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3.5"></ellipse>
+<ellipse cx="53" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="79" cy="62" rx="5" ry="3.3" fill="#EE8C80" opacity="0.85"></ellipse>
+<ellipse cx="66" cy="58.5" rx="3" ry="2.3" fill="#E3A07E"></ellipse>
+<ellipse cx="58.5" cy="54" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<ellipse cx="73.5" cy="54" rx="2.8" ry="3.4" fill="#2B1A14"></ellipse>
+<path d="M61.5 64.5 Q66 68 70.5 64.5" fill="none" stroke="#8A3B2E" stroke-width="2.4" stroke-linecap="round"></path>
+<path d="M49 39 C47.5 27 51 18 56 14 C61.5 18 65 27 66 39 Z" fill="#A82516" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M60 39 C59.5 26 64.5 15 72 11 C79.5 15 84.5 26 84 39 Z" fill="url(#bpMitre)" stroke="#3A2219" stroke-width="3.5" stroke-linejoin="round"></path>
+<path d="M72 15 L72 35" fill="none" stroke="#E8B54A" stroke-width="2.5" stroke-linecap="round"></path>
+<path d="M46.5 35 Q66 31 85.5 35 L85.5 41.5 Q66 37.5 46.5 41.5 Z" fill="#E8B54A" stroke="#3A2219" stroke-width="3" stroke-linejoin="round"></path>
+<circle cx="106" cy="90" r="6.5" fill="url(#bpSkin)" stroke="#3A2219" stroke-width="3"></circle>
+      </svg>
+      <div class="word">EMS</div>
+    </div>
+    <div>
+      <p>Version history and older downloads: <a href="https://github.com/vadostuta/ems-releases/releases">GitHub releases</a>.</p>
+      <p>Feedback, a bug, or stuck on a step? Get in touch via <a href="https://vvasko.com">vvasko.com</a>.</p>
+    </div>
   </div>
 </footer>
 
